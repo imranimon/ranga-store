@@ -9,18 +9,28 @@ const loadProducts = () => {
 const showProducts = (products) => {
   const allProducts = products.map((pd) => pd);
   for (const product of allProducts) {
-    const image = product.images;
+    const image = product.image;
     const div = document.createElement("div");
     div.classList.add("product");
-    div.innerHTML = `<div class="single-product">
+    div.innerHTML = `
+    <div class="single-product">
       <div>
-    <img class="product-image" src=${image}></img>
+        <div>
+          <img class="product-image" src="${image}"></img>
+        </div>
+        <h3>${product.title}</h3>
+        <p>Category: ${product.category}</p>
+        <h2>Price: $ ${product.price}</h2>
+        <div class="pt-2">
+          <p><i class="far fa-star"></i> <span class="text-success"> ${product.rating?.rate}</span></p>
+          <p><i class="far fa-user"></i><span class="text-success"> ${product.rating?.count}</span></p>
+        </div>
       </div>
-      <h3>${product.title}</h3>
-      <p>Category: ${product.category}</p>
-      <h2>Price: $ ${product.price}</h2>
-      <button onclick="addToCart(${product.id},${product.price})" id="addToCart-btn" class="buy-now btn btn-success">add to cart</button>
-      <button id="details-btn" class="btn btn-danger">Details</button></div>
+      <div id="single-product-footer" class="p-3">
+        <button onclick="addToCart(${product.id},${product.price})" id="addToCart-btn" class="buy-now btn btn-success">add to cart</button>
+        <button onclick="showDetils(${product.id})" id="details-btn" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">Details</button>
+      </div>
+    </div>
       `;
     document.getElementById("all-products").appendChild(div);
   }
@@ -32,11 +42,31 @@ const addToCart = (id, price) => {
 
   updateTaxAndCharge();
   document.getElementById("total-Products").innerText = count;
+
+  //update grandTotall
+  updateTotal();
 };
+
+//show product details on modal
+const showDetils = (pId) => {
+  const div = document.getElementById("product-details");
+  div.innerHTML = '';
+  const url = `https://fakestoreapi.com/products/${pId}`;
+  fetch(url)
+    .then(res => res.json())
+    .then(product => {
+      div.innerHTML = `
+      <h5>${product.title}</h5>
+      <h6>Category: ${product.category}</h6>
+      <h6>Price: ${product.price}</h2>
+      <p> <span class="fw-bold">Description:</span> ${product.description}</p>
+      `;
+    })
+}
 
 const getInputValue = (id) => {
   const element = document.getElementById(id).innerText;
-  const converted = parseInt(element);
+  const converted = parseFloat(element);
   return converted;
 };
 
@@ -45,7 +75,7 @@ const updatePrice = (id, value) => {
   const convertedOldPrice = getInputValue(id);
   const convertPrice = parseFloat(value);
   const total = convertedOldPrice + convertPrice;
-  document.getElementById(id).innerText = Math.round(total);
+  document.getElementById(id).innerText = Math.round(total * 100) / 100;
 };
 
 // set innerText function
